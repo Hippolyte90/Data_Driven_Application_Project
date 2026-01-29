@@ -1,0 +1,29 @@
+# --- DATA ---
+# On ne commit jamais la base de données SQLite générée
+data/processed/*.db
+# On exclut le dataset IBM s'il est considéré comme volumineux (Best Practice)
+data/raw/*.csv
+# Si nous décidons de ne pas uploader de fichiers > 5Mo, cette règle est essentielle
+*.csv
+*.xlsx
+
+# --- SÉCURITÉ & CONFIG ---
+# Contient nos secrets (mots de passe agents RH, clés API)
+.env
+
+# --- PYTHON ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+.pytest_cache/
+
+# --- DOCKER ---
+# On ignore les logs de Docker
+*.log
+
+# --- SYSTÈME ---
+.DS_Store
+Thumbs.db
