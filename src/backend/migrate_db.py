@@ -1,49 +1,49 @@
 """
-Script de migration pour ajouter les colonnes evaluation_note et comment
-à la table employees si elles n'existent pas déjà.
+Migration script to add evaluation_note and comment columns
+to the employees table if they do not already exist.
 """
 import sqlite3
 from pathlib import Path
 
 def migrate_database():
-    """Ajoute les colonnes evaluation_note et comment à la table employees."""
+    """Adds evaluation_note and comment columns to the employees table."""
     db_path = Path(__file__).resolve().parent.parent.parent / "data" / "hr_database.db"
     
     if not db_path.exists():
-        print(f"Base de données introuvable: {db_path}")
-        print("La base de données sera créée automatiquement au prochain démarrage.")
+        print(f"Database not found: {db_path}")
+        print("The database will be created automatically on next startup.")
         return
     
     conn = sqlite3.connect(str(db_path))
     cursor = conn.cursor()
     
     try:
-        # Vérifier si les colonnes existent déjà
+        # Check if columns already exist
         cursor.execute("PRAGMA table_info(employees)")
         columns = [col[1] for col in cursor.fetchall()]
         
-        # Ajouter evaluation_note si elle n'existe pas
+        # Add evaluation_note if it doesn't exist
         if 'evaluation_note' not in columns:
-            print("Ajout de la colonne 'evaluation_note'...")
+            print("Adding column 'evaluation_note'...")
             cursor.execute("ALTER TABLE employees ADD COLUMN evaluation_note REAL")
-            print("✓ Colonne 'evaluation_note' ajoutée avec succès.")
+            print("✓ Column 'evaluation_note' added successfully.")
         else:
-            print("✓ Colonne 'evaluation_note' existe déjà.")
+            print("✓ Column 'evaluation_note' already exists.")
         
-        # Ajouter comment si elle n'existe pas
+        # Add comment if it doesn't exist
         if 'comment' not in columns:
-            print("Ajout de la colonne 'comment'...")
+            print("Adding column 'comment'...")
             cursor.execute("ALTER TABLE employees ADD COLUMN comment TEXT")
-            print("✓ Colonne 'comment' ajoutée avec succès.")
+            print("✓ Column 'comment' added successfully.")
         else:
-            print("✓ Colonne 'comment' existe déjà.")
+            print("✓ Column 'comment' already exists.")
         
         conn.commit()
-        print("\n✅ Migration terminée avec succès!")
+        print("\n✅ Migration completed successfully!")
         
     except Exception as e:
         conn.rollback()
-        print(f"❌ Erreur lors de la migration: {e}")
+        print(f"Error during migration: {e}")
     finally:
         conn.close()
 

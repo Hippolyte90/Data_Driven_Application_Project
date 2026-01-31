@@ -1,3 +1,7 @@
+"""
+View module for the Dashboard.
+Contains logic for rendering KPIs, charts, and employee search results.
+"""
 import os
 import streamlit as st
 import requests
@@ -33,9 +37,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def card_container():
+    """Starts a styled container for KPI cards."""
     st.markdown('<div class="kpi-card">', unsafe_allow_html=True)
 
 def end_card():
+    """Ends the styled container for KPI cards."""
     st.markdown('</div>', unsafe_allow_html=True)
 
 def render_search_view():
@@ -86,27 +92,27 @@ def render_search_view():
     </style>
     """, unsafe_allow_html=True)
 
-    st.title("🔍 Résultat de la recherche")
+    st.title("🔍 Search Result")
 
     try:
         res = requests.get(f"{API_URL}/employee/{emp_id}", timeout=5)
     except Exception as e:
-        st.error(f"Erreur réseau: {e}")
-        if st.button("🏠 Retour à l'accueil"):
+        st.error(f"Network error: {e}")
+        if st.button("🏠 Return to Home"):
             del st.session_state.search_emp_id
             st.rerun()
         return
 
     if res.status_code == 404:
-        st.warning(f"⚠️ Aucun employé trouvé avec l'ID **{emp_id}**. Veuillez essayer un autre ID via la barre latérale.")
-        if st.button("🏠 Retour à l'accueil"):
+        st.warning(f"⚠️ No employee found with ID **{emp_id}**. Please try another ID via the sidebar.")
+        if st.button("🏠 Return to Home"):
             del st.session_state.search_emp_id
             st.rerun()
         return
     
     if res.status_code != 200:
-        st.error(f"Erreur lors de la récupération des données (Code {res.status_code}).")
-        if st.button("🏠 Retour à l'accueil"):
+        st.error(f"Error retrieving data (Code {res.status_code}).")
+        if st.button("🏠 Return to Home"):
             del st.session_state.search_emp_id
             st.rerun()
         return
@@ -117,50 +123,49 @@ def render_search_view():
     st.markdown(f"""
     <div class="employee-card">
         <div class="employee-header">
-            👤 Employé #{emp_id}
+            👤 Employee #{emp_id}
         </div>
         <div class="info-grid">
-            <div class="info-item"><div class="info-label">🏢 Département</div><div class="info-value">{emp.get('Department', 'N/A')}</div></div>
-            <div class="info-item"><div class="info-label">💰 Salaire Mensuel</div><div class="info-value">{emp.get('MonthlyIncome', 0):,}€</div></div>
-            <div class="info-item"><div class="info-label">📅 Années (Cie)</div><div class="info-value">{emp.get('YearsAtCompany', 0)} ans</div></div>
-            <div class="info-item"><div class="info-label">🎯 Poste</div><div class="info-value">{emp.get('JobRole', 'N/A')}</div></div>
-            <div class="info-item"><div class="info-label">😊 Satisfaction Job</div><div class="info-value">{emp.get('JobSatisfaction', 'N/A')}/4</div></div>
-            <div class="info-item"><div class="info-label">🧠 Implication</div><div class="info-value">{emp.get('JobInvolvement', 'N/A')}/4</div></div>
+            <div class="info-item"><div class="info-label">🏢 Department</div><div class="info-value">{emp.get('Department', 'N/A')}</div></div>
+            <div class="info-item"><div class="info-label">💰 Monthly Income</div><div class="info-value">{emp.get('MonthlyIncome', 0):,}€</div></div>
+            <div class="info-item"><div class="info-label">📅 Years (Co)</div><div class="info-value">{emp.get('YearsAtCompany', 0)} years</div></div>
+            <div class="info-item"><div class="info-label">🎯 Role</div><div class="info-value">{emp.get('JobRole', 'N/A')}</div></div>
+            <div class="info-item"><div class="info-label">😊 Job Satisfaction</div><div class="info-value">{emp.get('JobSatisfaction', 'N/A')}/4</div></div>
+            <div class="info-item"><div class="info-label">🧠 Involvement</div><div class="info-value">{emp.get('JobInvolvement', 'N/A')}/4</div></div>
             <div class="info-item"><div class="info-label">🌍 Env. Satisfaction</div><div class="info-value">{emp.get('EnvironmentSatisfaction', 'N/A')}/4</div></div>
             <div class="info-item"><div class="info-label">⚖️ Work-Life Balance</div><div class="info-value">{emp.get('WorkLifeBalance', 'N/A')}/4</div></div>
             <div class="info-item"><div class="info-label">🚪 Attrition</div><div class="info-value" style="color: {'#ff6b6b' if emp.get('Attrition') == 'Yes' else 'white'}; font-weight:bold;">{emp.get('Attrition', 'N/A')}</div></div>
-            <div class="info-item"><div class="info-label">⭐ Note d'évaluation</div><div class="info-value">{emp.get('evaluation_note', 'N/A') if emp.get('evaluation_note') is not None else 'N/A'}</div></div>
-            <div class="info-item"><div class="info-label">💬 Commentaire</div><div class="info-value">{emp.get('comment', 'No') if emp.get('comment') is not None else 'No'}</div></div>
-
+            <div class="info-item"><div class="info-label">⭐ Evaluation Rating</div><div class="info-value">{emp.get('evaluation_note', 'N/A') if emp.get('evaluation_note') is not None else 'N/A'}</div></div>
+            <div class="info-item"><div class="info-label">💬 Comment</div><div class="info-value">{emp.get('comment', 'No') if emp.get('comment') is not None else 'No'}</div></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     # Evaluation & Comment Form
-    st.subheader("📝 Évaluation et Commentaire")
-    st.info("Analysez les informations ci-dessus, puis ajoutez ou modifiez la note et le commentaire si nécessaire.")
+    st.subheader("📝 Evaluation and Comment")
+    st.info("Analyze the information above, then add or modify the rating and comment if necessary.")
 
     with st.form("eval_comment_form"):
         c1, c2 = st.columns(2)
         with c1:
             current_note = emp.get('evaluation_note')
             val_note = float(current_note) if current_note is not None else 5.0
-            new_note = st.slider("⭐ Note d'évaluation (/10)", 0.0, 10.0, val_note, 0.1)
+            new_note = st.slider("⭐ Evaluation Rating (/10)", 0.0, 10.0, val_note, 0.1)
         with c2:
             current_comment = emp.get('comment', '')
-            new_comment = st.text_area("💬 Commentaire", value=current_comment if current_comment else "", height=100)
+            new_comment = st.text_area("💬 Comment", value=current_comment if current_comment else "", height=100)
         
-        if st.form_submit_button("💾 Enregistrer les modifications", use_container_width=True):
+        if st.form_submit_button("💾 Save Changes", use_container_width=True):
             try:
                 requests.post(f"{API_URL}/update_evaluation_note", json={"id": emp_id, "evaluation_note": new_note}, timeout=5)
                 requests.post(f"{API_URL}/update_comment", json={"id": emp_id, "comment": new_comment}, timeout=5)
-                st.success("Informations enregistrées avec succès !")
+                st.success("Information saved successfully!")
                 st.rerun()
             except Exception as e:
-                st.error(f"Erreur lors de l'enregistrement: {e}")
+                st.error(f"Error saving: {e}")
 
     st.markdown("---")
-    if st.button("🏠 Retour à l'accueil", use_container_width=True):
+    if st.button("🏠 Return to Home", use_container_width=True):
         del st.session_state.search_emp_id
         st.rerun()
 
@@ -388,7 +393,7 @@ useful_cols = ['id','Age',
                 'PerformanceRating', 'JobSatisfaction','WorkLifeBalance','Attrition'] 
 
 
-# Sale department data view
+# Sales department data view
 def render_sales_data():
     """Renders the Sales department dashboard view with KPIs and visualizations."""
     
@@ -594,10 +599,10 @@ def render_sales_data():
     df_sales = pd.DataFrame(sales_data)
     df_sales = df_sales[useful_cols]
     
-    st.dataframe(df_sales, use_container_width=True, hide_index=True)
+    st.dataframe(df_sales, width="stretch", hide_index=True)
     
     
-# RD department data view
+# R&D department data view
 def render_rd_data():
     """Renders the R&D department dashboard view with KPIs and visualizations."""
     
@@ -803,7 +808,7 @@ def render_rd_data():
     df_rd = pd.DataFrame(rd_data)
     df_rd = df_rd[useful_cols]
     
-    st.dataframe(df_rd, use_container_width=True, hide_index=True)
+    st.dataframe(df_rd, width="stretch", hide_index=True)
     
 # HR department data view
 def render_hr_data():
@@ -995,7 +1000,7 @@ def render_hr_data():
     df_hr = pd.DataFrame(hr_data)
     df_hr = df_hr[useful_cols]
     
-    st.dataframe(df_hr, use_container_width=True, hide_index=True)
+    st.dataframe(df_hr, width="stretch", hide_index=True)
     
     
 

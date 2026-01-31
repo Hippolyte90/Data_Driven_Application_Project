@@ -4,6 +4,11 @@ from pydantic import BaseModel
 
 
 class Employee(Base):
+    """
+    SQLAlchemy model representing the 'employees' table.
+    Stores comprehensive details about an employee including personal info,
+    job details, and performance metrics.
+    """
     __tablename__ = "employees"
     id = Column(Integer, primary_key=True, index=True)
     Age = Column(Integer)
@@ -43,11 +48,19 @@ class Employee(Base):
     comment = Column(String, default=None)
 
 class UserRH(Base):
+    """
+    SQLAlchemy model representing the 'users_rh' table.
+    Stores authentication details for HR users.
+    """
     __tablename__ = "users_rh"
     email = Column(String, primary_key=True, index=True)
-    password = Column(String) # En production, utilisez un hash
+    password = Column(String) # In production, use a hash
     
 class Sales(Base):
+    """
+    SQLAlchemy model representing the 'sales' table.
+    Contains a subset of employee data specific to the Sales department.
+    """
     __tablename__ = "sales"
     id = Column(Integer, primary_key=True, index=True)
     Age = Column(Integer)
@@ -63,6 +76,10 @@ class Sales(Base):
     WorkLifeBalance = Column(Integer)
     
 class RD(Base):
+    """
+    SQLAlchemy model representing the 'RD' table.
+    Contains a subset of employee data specific to the R&D department.
+    """
     __tablename__ = "RD"
     id = Column(Integer, primary_key=True, index=True)
     Age = Column(Integer)
@@ -78,6 +95,10 @@ class RD(Base):
     WorkLifeBalance = Column(Integer)
     
 class HR(Base):
+    """
+    SQLAlchemy model representing the 'HR' table.
+    Contains a subset of employee data specific to the HR department.
+    """
     __tablename__ = "HR"
     id = Column(Integer, primary_key=True, index=True)
     Age = Column(Integer)

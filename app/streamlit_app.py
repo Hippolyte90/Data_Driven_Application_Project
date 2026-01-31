@@ -1,3 +1,7 @@
+"""
+Main entry point for the Streamlit frontend application.
+Handles authentication, navigation, and page rendering.
+"""
 import base64
 from pathlib import Path
 import sys
@@ -5,6 +9,7 @@ import os
 
 import streamlit as st
 import requests
+from transformers import pipeline
 
 # Ensure project root is on sys.path so `import src` works inside containers
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -20,7 +25,7 @@ st.set_page_config(page_title="HR Management System",
 # Function to upload the CSS
 def local_css(file_path: Path):
     if not file_path.exists():
-        st.warning(f"CSS introuvable : {file_path}")
+        st.warning(f"CSS not found : {file_path}")
         return
     with file_path.open(encoding="utf-8") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -47,47 +52,7 @@ def _try_rerun():
         pass
 
 
-LANGUAGE_OPTIONS = ["FR", "EN"]
-if "lang_select" not in st.session_state:
-    st.session_state.lang_select = LANGUAGE_OPTIONS[0]
-
-MANUAL_TRANSLATIONS = {
-    "Connexion RH": "HR Login",
-    "Inscription": "Sign up",
-    "Email": "Email",
-    "Mot de passe": "Password",
-    "S'inscrire": "Sign up",
-    "Compte créé ! Veuillez vous connecter.": "Account created! Please log in.",
-    "Erreur lors de l'inscription.": "Error during registration.",
-    "Déjà inscrit ? Se connecter": "Already registered? Log in",
-    "Connexion": "Log in",
-    "Se connecter": "Log in",
-    "Erreur de connexion (réponse invalide du serveur).": "Login error (invalid server response).",
-    "Identifiants incorrects.": "Incorrect credentials.",
-    "Pas encore inscrit ? S'inscrire": "Not registered yet? Sign up",
-    "Dashboard": "Dashboard",
-    "Ajouter Employé": "Add Employee",
-    "Aide": "Help",
-    "Langue": "Language",
-    "REQUEST DEMO": "Request Demo",
-    "Merci, nous vous contacterons pour une démo.": "Thank you, we will contact you for a demo.",
-    "Se déconnecter": "Log out",
-    "Erreur en chargeant le dashboard:": "Error loading dashboard:",
-    "Erreur en chargeant le formulaire d'ajout:": "Error loading the add form:",
-}
-
-
-def translate_label(label: str) -> str:
-    if not label:
-        return label
-    if st.session_state.get("lang_select", "FR").upper() != "EN":
-        return label
-    return MANUAL_TRANSLATIONS.get(label, label)
-
-
-t = translate_label
-
-# --- AUTHENTIFICATION ---
+# --- AUTHENTICATION ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -95,58 +60,64 @@ if not st.session_state.logged_in:
     # center authentication UI in the middle column
     left, center, right = st.columns([1, 2, 1])
     with center:
-        st.title(t("Connexion RH"))
+        st.title("HR Login")
 
         # Ensure a flag that indicates registration completed
         if "registered" not in st.session_state:
             st.session_state.registered = False
 
-        # Step 1: Inscription
+        # Step 1: Registration
         if not st.session_state.registered:
-            st.subheader(t("Inscription"))
-            email_reg = st.text_input(t("Email"), key="reg_email")
-            pw_reg = st.text_input(t("Mot de passe"), type="password", key="reg_pw")
-            if st.button(t("S'inscrire")):
-                res = requests.post(f"{API_URL}/register", json={"email": email_reg, "password": pw_reg})
-                if res.status_code == 200:
-                    st.success(t("Compte créé ! Veuillez vous connecter."))
-                    # remember email for the login step
-                    st.session_state.registered = True
-                    st.session_state.prefill_email = email_reg
-                    _try_rerun()
+            st.subheader("Sign up")
+            email_reg = st.text_input("Email", key="reg_email")
+            pw_reg = st.text_input("Password", type="password", key="reg_pw")
+            if st.button("Sign up"):
+                if not email_reg or not pw_reg:
+                    st.error("Incorrect credentials.")
                 else:
-                    # try to show backend error message
-                    try:
-                        err = res.json().get("detail")
-                    except Exception:
-                        err = t("Erreur lors de l'inscription.")
-                    st.error(err)
+                    res = requests.post(f"{API_URL}/register", json={"email": email_reg, "password": pw_reg})
+                    if res.status_code == 200:
+                        st.success("Account created! Please log in.")
+                        # remember email for the login step
+                        st.session_state.registered = True
+                        st.session_state.prefill_email = email_reg
+                        _try_rerun()
+                    else:
+                        # try to show backend error message
+                        try:
+                            err = res.json().get("detail")
+                        except Exception:
+                            err = "Error during registration."
+                        st.error(err)
             # Allow users who already have an account to go directly to login
-            if st.button(t("Déjà inscrit ? Se connecter")):
+            if st.button("Already registered? Log in"):
                 st.session_state.registered = True
                 _try_rerun()
 
-        # Step 2: Connexion (display after inscription)
+        # Step 2: Login (display after registration)
         else:
-            st.subheader(t("Connexion"))
+            st.subheader("Log in")
             prefill = st.session_state.get("prefill_email", "")
-            email_log = st.text_input(t("Email"), key="log_email", value=prefill)
-            pw_log = st.text_input(t("Mot de passe"), type="password", key="log_pw")
-            if st.button(t("Se connecter")):
-                res = requests.post(f"{API_URL}/login", json={"email": email_log, "password": pw_log})
-                try:
-                    payload = res.json()
-                except Exception:
-                    st.error(t("Connection error(invalid server response)."))
-                    st.stop()
-                if payload.get("status") == "success":
-                    st.session_state.logged_in = True
-                    _try_rerun()
+            email_log = st.text_input("Email", key="log_email", value=prefill)
+            pw_log = st.text_input("Password", type="password", key="log_pw")
+            if st.button("Log in"):
+                if not email_log or not pw_log:
+                    st.error("Incorrect credentials.")
                 else:
-                    fallback_err = t("Identifiants incorrects.")
-                    st.error(payload.get("message", fallback_err))
+                    res = requests.post(f"{API_URL}/login", json={"email": email_log, "password": pw_log})
+                    try:
+                        payload = res.json()
+                    except Exception:
+                        st.error("Login error (invalid server response).")
+                        st.stop()
+                    if payload.get("status") == "success":
+                        st.session_state.logged_in = True
+                        _try_rerun()
+                    else:
+                        fallback_err = "Incorrect credentials."
+                        st.error(payload.get("message", fallback_err))
             # If user hasn't registered yet, allow returning to the inscription form
-            if st.button(t("Pas encore inscrit ? S'inscrire")):
+            if st.button("Not registered yet? Sign up"):
                 st.session_state.registered = False
                 _try_rerun()
 
@@ -154,7 +125,7 @@ if not st.session_state.logged_in:
 
 
 # Header: logo left, centered menu, globe + demo button right
-PAGE_KEYS = ["Dashboard", "Ajouter Employé", "Aide"]
+PAGE_KEYS = ["Dashboard", "Add Employee", "Help"]
 if "page" not in st.session_state:
     st.session_state.page = PAGE_KEYS[0]
     
@@ -204,31 +175,23 @@ with st.sidebar:
     st.markdown("<div style='height: 40px'></div>", unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### 🔍 Recherche Employé")
+    st.markdown("### 🔍 Employee Search")
 
     def run_search():
         st.session_state.search_emp_id = st.session_state.sidebar_search_input
         st.session_state.page = "Dashboard"
         st.session_state.dept_page = "All"
 
-    st.number_input("ID Employé", min_value=1, step=1, key="sidebar_search_input")
-    st.button("🔎 Rechercher", key="sidebar_search_btn", on_click=run_search)
+    st.number_input("Employee ID", min_value=1, step=1, key="sidebar_search_input")
+    st.button("🔎 Search", key="sidebar_search_btn", on_click=run_search)
     st.markdown("---")
 
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
-        
-    
-    st.markdown("<div style='height: -40px'></div>", unsafe_allow_html=True)
-    st.markdown(f"<div style='font-size:20px;font-weight:600;'>{t('Langue')}</div>", unsafe_allow_html=True)
-    st.selectbox("", LANGUAGE_OPTIONS, key="lang_select")
-    st.markdown("<div style='height: 40px'></div>", unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 
 
-    if st.button(t("Se déconnecter")):
+    if st.button("Log out"):
         st.session_state.update({"logged_in": False})
         _try_rerun()
 
@@ -236,7 +199,7 @@ st.markdown("<div style='margin-top:-24px;'></div>", unsafe_allow_html=True)
 # Try to use streamlit-option-menu for a nicer horizontal menu; fallback to buttons
 try:
     from streamlit_option_menu import option_menu
-    menu_labels = [t(label) for label in PAGE_KEYS]
+    menu_labels = PAGE_KEYS
     default_index = PAGE_KEYS.index(st.session_state.page) if st.session_state.page in PAGE_KEYS else 0
     selected_label = option_menu(
         None,
@@ -261,16 +224,16 @@ except Exception:
     # fallback to simple buttons
     nav1, nav2, nav3 = st.columns([1, 1, 1])
     with nav1:
-        if st.button(t("Dashboard")):
+        if st.button("Dashboard"):
             st.session_state.page = "Dashboard"
             _try_rerun()
     with nav2:
-        if st.button(t("Ajouter Employé")):
-            st.session_state.page = "Ajouter Employé"
+        if st.button("Add Employee"):
+            st.session_state.page = "Add Employee"
             _try_rerun()
     with nav3:
-        if st.button(t("Aide")):
-            st.session_state.page = "Aide"
+        if st.button("Help"):
+            st.session_state.page = "Help"
             _try_rerun()
             
             
@@ -291,16 +254,25 @@ if page == "Dashboard":
             render_hr_data()
         
     except Exception as e:
-        st.error(f"{t('Erreur en chargeant le dashboard:')} {e}") 
+        st.error(f"Error loading dashboard: {e}") 
 
-elif page == "Ajouter Employé":
+elif page == "Add Employee":
     try:
         from src.frontend.add_employee_view import render_add_employee
         render_add_employee()
     except Exception as e:
-        st.error(t("Erreur en chargeant le formulaire d'ajout:") + f" {e}")
+        st.error(f"Error loading the add form: {e}")
+
+elif page == "Help":
+    try:
+        from src.frontend.help_view import render_help
+        render_help()
+    except Exception as e:
+        st.error(f"Error loading help page: {e}")
+
 st.markdown("<div style='height: 120px'></div>", unsafe_allow_html=True)
 st.markdown(" ") 
+st.markdown(" ")
 st.markdown(" ") 
 st.markdown(" ")          
 st.markdown(" ")  

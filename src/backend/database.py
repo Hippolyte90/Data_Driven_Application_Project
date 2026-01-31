@@ -1,3 +1,7 @@
+"""
+Database configuration module.
+Sets up the SQLite database connection and SQLAlchemy session factory.
+"""
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base

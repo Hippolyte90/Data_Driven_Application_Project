@@ -1,1 +1,1 @@
-from . import add_employee_view, dashboard_view
+from . import add_employee_view, dashboard_view, help_view
