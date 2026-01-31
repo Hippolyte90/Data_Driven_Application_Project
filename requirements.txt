@@ -1,0 +1,26 @@
+# Web Framework & API
+fastapi
+uvicorn
+
+# Database & ORM
+sqlalchemy
+pandas
+
+# Sécurité & Authentification
+passlib[bcrypt]
+python-multipart
+
+# Machine Learning & Data
+scikit-learn
+numpy
+
+# Frontend
+streamlit
+streamlit-option-menu
+requests
+
+# Data Source
+kagglehub
+
+# Graphs & Visualization
+plotly

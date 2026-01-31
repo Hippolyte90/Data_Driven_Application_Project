@@ -39,6 +39,8 @@ class Employee(Base):
     YearsSinceLastPromotion = Column(Integer)
     YearsWithCurrManager = Column(Integer)
     score = Column(Float, default=0.0)
+    evaluation_note = Column(Float, default=None)
+    comment = Column(String, default=None)
 
 class UserRH(Base):
     __tablename__ = "users_rh"

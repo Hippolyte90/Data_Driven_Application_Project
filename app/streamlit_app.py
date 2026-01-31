@@ -202,6 +202,19 @@ with st.sidebar:
     
     st.selectbox("Department", DEPT_PAGE_KEYS, key="dept_page")
     st.markdown("<div style='height: 40px'></div>", unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("### 🔍 Recherche Employé")
+
+    def run_search():
+        st.session_state.search_emp_id = st.session_state.sidebar_search_input
+        st.session_state.page = "Dashboard"
+        st.session_state.dept_page = "All"
+
+    st.number_input("ID Employé", min_value=1, step=1, key="sidebar_search_input")
+    st.button("🔎 Rechercher", key="sidebar_search_btn", on_click=run_search)
+    st.markdown("---")
+
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
         

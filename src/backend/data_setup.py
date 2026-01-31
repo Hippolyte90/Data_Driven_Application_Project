@@ -31,12 +31,16 @@ def setup_db():
     print(db_path)
     csv_path = os.path.join(path, csv_file)
     df = pd.read_csv(csv_path)
-    # Ajout de la colonne score par défaut (Point 7)
+    
+    # Added default evaluation score, evaluation note and comments column for HR.
     df['score'] = 0.0
-    # On utilise EmployeeNumber comme ID
+    df['evaluation_note'] = None
+    df['comment'] = ""
+    
+    # We use EmployeeNumber as the ID
     df = df.rename(columns={'EmployeeNumber': 'id'})
     
-    # ensure parent directory exists so SQLite can create the file
+    # Ensure parent directory exists so SQLite can create the file
     db_path.parent.mkdir(parents=True, exist_ok=True)
     engine = create_engine('sqlite:////' + str(db_path))
     if df.to_sql('employees', engine, if_exists='replace', index=False):

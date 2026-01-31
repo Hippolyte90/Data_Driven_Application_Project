@@ -35,3 +35,17 @@ def get_data_rd_department(db: Session):
 
 def get_data_hr_department(db: Session):
     return db.query(models.HR).all()
+
+def update_employee_evaluation_note(db: Session, emp_id: int, evaluation_note: float):
+    emp = db.query(models.Employee).filter(models.Employee.id == emp_id).first()
+    if emp:
+        emp.evaluation_note = evaluation_note
+        db.commit()
+    return emp
+
+def update_employee_comment(db: Session, emp_id: int, comment: str):
+    emp = db.query(models.Employee).filter(models.Employee.id == emp_id).first()
+    if emp:
+        emp.comment = comment
+        db.commit()
+    return emp

@@ -2,9 +2,12 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.backend.database import SessionLocal, engine, Base
 from src.backend import database, models, crud, data_setup
+from src.backend.migrate_db import migrate_database
 import pandas as pd
 
 Base.metadata.create_all(bind=engine)
+# Migrer la base de données pour ajouter les nouvelles colonnes
+migrate_database()
 app = FastAPI(
     title="RH Performance and Attrition API",
     description="An API to retrieve employees information and performance.",
@@ -58,7 +61,7 @@ def login(data: dict, db: Session = Depends(get_db)):
 
 
 @app.get("/employee")
-def read_employee(db: Session = Depends(get_db)):
+def read_employees(db: Session = Depends(get_db)):
     emp = crud.get_employee_data(db)
     if not emp: raise HTTPException(status_code=404, detail="Employee data not found")
     return emp
@@ -189,6 +192,20 @@ def get_stats(db: Session = Depends(get_db)):
 @app.post("/update_score")
 def update_score(data: dict, db: Session = Depends(get_db)):
     return crud.update_employee_score(db, data['id'], data['score'])
+
+@app.post("/update_evaluation_note")
+def update_evaluation_note(data: dict, db: Session = Depends(get_db)):
+    emp = crud.get_employee(db, data['id'])
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    return crud.update_employee_evaluation_note(db, data['id'], data['evaluation_note'])
+
+@app.post("/update_comment")
+def update_comment(data: dict, db: Session = Depends(get_db)):
+    emp = crud.get_employee(db, data['id'])
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    return crud.update_employee_comment(db, data['id'], data['comment'])
 
 
 @app.post("/add_employee")
