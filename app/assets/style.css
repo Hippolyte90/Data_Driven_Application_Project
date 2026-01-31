@@ -1,0 +1,36 @@
+/* style.css */
+
+/*Reset: Remove the interior margins. Let the dark edge extend to the top, left, bottom, and right edges of the screen without any white filler.*/
+.block-container {
+    padding-top: 0rem !important;
+    padding-bottom: 0rem !important;
+    padding-left: 0rem !important;
+    padding-right: 2rem !important;
+    max-width: 100% !important; /*Force the application to use all available width instead of centering*/
+}
+
+header {display: none !important;}
+
+.stApp {
+    background: linear-gradient(to right, #d8d9dd 20%, #f8f9fa 20%);
+    background-attachment: fixed;
+}
+
+[data-testid="column"]:nth-of-type(1) {
+    padding: 30px 20px !important;
+}
+
+[data-testid="column"]:nth-of-type(1) h1, 
+[data-testid="column"]:nth-of-type(1) h2, 
+[data-testid="column"]:nth-of-type(1) h3, 
+[data-testid="column"]:nth-of-type(1) label,
+[data-testid="column"]:nth-of-type(1) p {
+    color: white !important;
+}
+
+div[data-testid="stMetric"] {
+    background-color: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}

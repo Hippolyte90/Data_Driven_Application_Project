@@ -1,0 +1,31 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+# Web Framework & API
+fastapi
+uvicorn
+
+# Database & ORM
+sqlalchemy
+pandas
+
+# Sécurité & Authentification
+passlib[bcrypt]
+python-multipart
+
+# Machine Learning & Data
+scikit-learn
+numpy
+
+# Frontend
+streamlit
+streamlit-option-menu
+requests
+
+# Data Source
+kagglehub
+
+# Graphs & Visualization
+plotly
+
+transformers 
+sentencepiece 
+torch==2.2.0+cpu

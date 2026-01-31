@@ -1,0 +1,11 @@
+name: solftware_env
+channels:
+  - defaults
+dependencies:
+  - python=3.13.11
+  - pip
+  - pip:
+      - -r requirements.txt
+
+
+# conda env create -f environment.yaml
