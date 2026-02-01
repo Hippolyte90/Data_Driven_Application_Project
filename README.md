@@ -103,3 +103,8 @@ hr_management_system/
 ## Github repository link:
 
 GitHub: https://github.com/Hippolyte90/Data_Driven_Application_Project#
+
+## Quickly start:
+Sign up and login with the following identifier or use your own identifier:
+Email: admin@gmail.com
+Password: admin
